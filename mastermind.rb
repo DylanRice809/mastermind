@@ -9,15 +9,29 @@ class Game
   @@computer_wins = 0
 
   attr_accessor :game_board, :player
+  attr_reader :computer
 
   def initialize
     @game_board = GameBoard.new
     @computer = Computer.new
     @player = Human.new
+    p @computer
+  end
+
+  def check_color (code, guess, code_for_mod=[])
+    code.each { |element| code_for_mod << element }
+    guess.reduce(0) do |correct, color|
+      if code_for_mod.any?(color)
+        code_for_mod.delete(color)
+        correct += 1
+      else
+        correct
+      end
+    end
   end
 
   def check_win
-    p @computer_code == @player_guess ? true : false
+    computer.code == player.player_choice ? true : false
   end
 
   def display_board ()
@@ -36,6 +50,8 @@ class Game
   def take_turn
     player.player_choice = get_guess
     game_board.decoding_board[player.turn_number] = player.player_choice
+    p check_color(computer.code, player.player_choice)
+    p computer.code
     player.turn_number += 1
     display_board
   end
@@ -43,6 +59,8 @@ end
 
 class Computer
   include Colors
+
+  attr_reader :code
 
   def initialize
     @code = COLORS.sample(4)
@@ -70,5 +88,4 @@ class GameBoard
 end
 
 game = Game.new
-game.take_turn
 game.take_turn
