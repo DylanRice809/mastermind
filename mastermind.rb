@@ -30,6 +30,12 @@ class Game
     end
   end
 
+  def check_color_and_position (code, guess)
+    guess.each_with_index.reduce(0) do |correct, (color, i)|
+      code[i] == color ? correct += 1 : correct
+    end
+  end
+
   def check_win
     computer.code == player.player_choice ? true : false
   end
@@ -38,7 +44,7 @@ class Game
     p COLORS
     for i in 0..11
       p game_board.decoding_board[i]
-      puts game_board.feedback_board[i]
+      p game_board.feedback_board[i]
       puts "\n"
     end
   end
@@ -50,8 +56,8 @@ class Game
   def take_turn
     player.player_choice = get_guess
     game_board.decoding_board[player.turn_number] = player.player_choice
-    p check_color(computer.code, player.player_choice)
-    p computer.code
+    game_board.feedback_board[player.turn_number][:colors_correct] = check_color(computer.code, player.player_choice)
+    game_board.feedback_board[player.turn_number][:color_and_position_correct] = check_color_and_position(computer.code, player.player_choice)
     player.turn_number += 1
     display_board
   end
@@ -83,7 +89,7 @@ class GameBoard
 
   def initialize
     @decoding_board = Array.new(12) { Array.new(4, "_") }
-    @feedback_board = Array.new(12, "")
+    @feedback_board = Array.new(12) { Hash.new }
   end
 end
 
