@@ -42,6 +42,7 @@ class Game
 
   def display_board ()
     p COLORS
+    puts "\n"
     for i in 0..11
       p game_board.decoding_board[i]
       p game_board.feedback_board[i]
@@ -54,12 +55,25 @@ class Game
   end
 
   def take_turn
+    puts "Guess four colors:"
     player.player_choice = get_guess
     game_board.decoding_board[player.turn_number] = player.player_choice
     game_board.feedback_board[player.turn_number][:colors_correct] = check_color(computer.code, player.player_choice)
     game_board.feedback_board[player.turn_number][:color_and_position_correct] = check_color_and_position(computer.code, player.player_choice)
     player.turn_number += 1
     display_board
+  end
+
+  def play_game
+    while player.turn_number < 12
+      take_turn
+      if check_win
+        puts "Congratulations! You won in #{player.turn_number} tries."
+        player.turn_number = 12
+      elsif player.turn_number == 12
+        puts "You lost. The code was #{computer.code}"
+      end
+    end
   end
 end
 
@@ -94,4 +108,4 @@ class GameBoard
 end
 
 game = Game.new
-game.take_turn
+game.play_game
