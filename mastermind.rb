@@ -107,7 +107,8 @@ class Human < Player
 
   def initialize
     super
-    @player_choice = []
+    puts "Input your code:"
+    @player_choice = gets.chomp.split(" ")
   end
 end
 
