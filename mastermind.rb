@@ -15,11 +15,11 @@ class Game
     @game_board = GameBoard.new
     puts "Set code?"
     if gets.chomp == "y"
-      @code_setter = Human.new
-      @code_breaker = Computer.new
+      @code_setter = CodeSetter.new(true)
+      @code_breaker = CodeBreaker.new(false)
     else
-      @code_setter = Computer.new
-      @code_breaker = Human.new
+      @code_setter = CodeSetter.new(false)
+      @code_breaker = CodeBreaker.new(true)
     end
   end
 
@@ -86,29 +86,58 @@ end
 class Player
   include Colors
 
+  attr_reader :human
   attr_accessor :turn_number
 
-  def initialize
-    @turn_number = 0
+  def initialize (human)
+    @player_choice = []
+    @human = human
+    if self == self.human && @human == true
+      puts "Input your code:"
+      @code = gets.chomp.split(" ")
+    else
+      @code = COLORS.sample(4)
+    end
   end
 end
 
-class Computer < Player
-  attr_reader :code
-
-  def initialize
-    super
-    @code = COLORS.sample(4)
+module Computer
+  def random_code (color_array)
+    color_array.sample(4)
   end
 end
 
-class Human < Player
+module Human
   attr_accessor :player_choice
 
-  def initialize
-    super
-    puts "Input your code:"
-    @player_choice = gets.chomp.split(" ")
+  def initialize (human)
+    super (human)
+  end
+end
+
+class CodeBreaker
+  include Computer, Human
+
+  def initialize (human)
+    @human = human
+    @turn_number = 0
+    @player_choice = []
+  end
+end
+
+class CodeSetter
+  include Computer, Human, Colors
+
+  def initialize (human)
+    @human = human
+    if @human == true
+      puts "Input your code:"
+      @code = gets.chomp.split(" ")
+      p @code
+    else
+      @code = random_code(COLORS)
+      p @code
+    end
   end
 end
 
@@ -122,4 +151,3 @@ class GameBoard
 end
 
 game = Game.new
-game.play_game
