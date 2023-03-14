@@ -2,8 +2,26 @@ module Colors
   COLORS = ["yellow", "white", "black", "brown", "orange", "red", "green", "blue"]
 end
 
+module Computer
+  def random_code (color_array)
+    color_array.sample(4)
+  end
+
+  def computer_guess (color_array)
+    color_array.sample(4)
+  end
+end
+
+module Human
+  def human_guess
+    gets.chomp.split(" ")
+  end
+end
+
 class Game
   include Colors
+  include Human
+  include Computer
 
   @@human_wins = 0
   @@computer_wins = 0
@@ -61,7 +79,7 @@ class Game
 
   def take_turn
     puts "Guess four colors:"
-    code_breaker.player_choice = get_guess
+    code_breaker.new_choice(code_breaker.human)
     game_board.decoding_board[code_breaker.turn_number] = code_breaker.player_choice
     game_board.feedback_board[code_breaker.turn_number][:colors_correct] = check_color(code_setter.code, code_breaker.player_choice)
     game_board.feedback_board[code_breaker.turn_number][:color_and_position_correct] = check_color_and_position(code_setter.code, code_breaker.player_choice)
@@ -83,57 +101,41 @@ class Game
   end
 end
 
-class Player
+class CodeBreaker
+  include Computer
+  include Human
   include Colors
 
+  attr_accessor :turn_number, :player_choice
   attr_reader :human
-  attr_accessor :turn_number
-
-  def initialize (human)
-    @player_choice = []
-    @human = human
-    if self == self.human && @human == true
-      puts "Input your code:"
-      @code = gets.chomp.split(" ")
-    else
-      @code = COLORS.sample(4)
-    end
-  end
-end
-
-module Computer
-  def random_code (color_array)
-    color_array.sample(4)
-  end
-end
-
-module Human
-  attr_accessor :player_choice
-
-  def initialize (human)
-    super (human)
-  end
-end
-
-class CodeBreaker
-  include Computer, Human
 
   def initialize (human)
     @human = human
     @turn_number = 0
     @player_choice = []
   end
+
+  def new_choice (human)
+    if human
+      @player_choice = human_guess
+    else
+      @player_choice = computer_guess(COLORS)
+    end
+  end
 end
 
 class CodeSetter
-  include Computer, Human, Colors
+  include Computer
+  include Human
+  include Colors
+
+  attr_reader :code, :human
 
   def initialize (human)
     @human = human
     if @human == true
       puts "Input your code:"
       @code = gets.chomp.split(" ")
-      p @code
     else
       @code = random_code(COLORS)
       p @code
@@ -151,3 +153,4 @@ class GameBoard
 end
 
 game = Game.new
+game.play_game
