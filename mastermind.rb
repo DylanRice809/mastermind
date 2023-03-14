@@ -73,10 +73,6 @@ class Game
     end
   end
 
-  def get_guess
-    gets.chomp.split(" ")
-  end
-
   def take_turn
     puts "Guess four colors:"
     code_breaker.new_choice(code_breaker.human)
