@@ -8,14 +8,19 @@ class Game
   @@human_wins = 0
   @@computer_wins = 0
 
-  attr_accessor :game_board, :player
-  attr_reader :computer
+  attr_accessor :game_board, :code_breaker
+  attr_reader :code_setter
 
   def initialize
     @game_board = GameBoard.new
-    @computer = Computer.new
-    @player = Human.new
-    p @computer
+    puts "Set code?"
+    if gets.chomp == "y"
+      @code_setter = Human.new
+      @code_breaker = Computer.new
+    else
+      @code_setter = Computer.new
+      @code_breaker = Human.new
+    end
   end
 
   def check_color (code, guess, code_for_mod=[])
@@ -37,7 +42,7 @@ class Game
   end
 
   def check_win
-    computer.code == player.player_choice ? true : false
+    code_setter.code == code_breaker.player_choice ? true : false
   end
 
   def display_board ()
@@ -56,45 +61,53 @@ class Game
 
   def take_turn
     puts "Guess four colors:"
-    player.player_choice = get_guess
-    game_board.decoding_board[player.turn_number] = player.player_choice
-    game_board.feedback_board[player.turn_number][:colors_correct] = check_color(computer.code, player.player_choice)
-    game_board.feedback_board[player.turn_number][:color_and_position_correct] = check_color_and_position(computer.code, player.player_choice)
-    player.turn_number += 1
+    code_breaker.player_choice = get_guess
+    game_board.decoding_board[code_breaker.turn_number] = code_breaker.player_choice
+    game_board.feedback_board[code_breaker.turn_number][:colors_correct] = check_color(code_setter.code, code_breaker.player_choice)
+    game_board.feedback_board[code_breaker.turn_number][:color_and_position_correct] = check_color_and_position(code_setter.code, code_breaker.player_choice)
+    code_breaker.turn_number += 1
     display_board
+    puts "------------------"
   end
 
   def play_game
-    while player.turn_number < 12
+    while code_breaker.turn_number < 12
       take_turn
       if check_win
-        puts "Congratulations! You won in #{player.turn_number} tries."
-        player.turn_number = 12
-      elsif player.turn_number == 12
-        puts "You lost. The code was #{computer.code}"
+        puts "Congratulations! You won in #{code_breaker.turn_number} tries."
+        code_breaker.turn_number = 12
+      elsif code_breaker.turn_number == 12
+        puts "You lost. The code was #{code_setter.code}"
       end
     end
   end
 end
 
-class Computer
+class Player
   include Colors
 
+  attr_accessor :turn_number
+
+  def initialize
+    @turn_number = 0
+  end
+end
+
+class Computer < Player
   attr_reader :code
 
   def initialize
+    super
     @code = COLORS.sample(4)
   end
 end
 
-class Human
-  include Colors
-
-  attr_accessor :player_choice, :turn_number
+class Human < Player
+  attr_accessor :player_choice
 
   def initialize
+    super
     @player_choice = []
-    @turn_number = 0
   end
 end
 
