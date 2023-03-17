@@ -10,6 +10,26 @@ module Computer
   def computer_guess (color_array)
     color_array.sample(4)
   end
+
+  def computer_guess (correct_colors_array)
+    if correct_colors_array.length == 4
+      correct_colors_array.sample(4)
+    else
+      color_choice = correct_colors_array.sample(1).join
+      choice = []
+      for i in 1..4
+        choice << color_choice
+        i += 1
+      end
+      choice
+    end
+  end
+
+  def check_computer_color (turn, feedback, correct_colors_array, guess)
+    if feedback[turn][:colors_correct] == 0
+      correct_colors_array.delete(guess[0])
+    end
+  end
 end
 
 module Human
@@ -30,6 +50,8 @@ class Game
   attr_reader :code_setter
 
   def initialize
+    @correct_colors = []
+    @correct_colors = COLORS.each { |color| @correct_colors << color }
     @game_board = GameBoard.new
     puts "Set code?"
     if gets.chomp == "y"
@@ -79,6 +101,8 @@ class Game
     game_board.decoding_board[code_breaker.turn_number] = code_breaker.player_choice
     game_board.feedback_board[code_breaker.turn_number][:colors_correct] = check_color(code_setter.code, code_breaker.player_choice)
     game_board.feedback_board[code_breaker.turn_number][:color_and_position_correct] = check_color_and_position(code_setter.code, code_breaker.player_choice)
+    check_computer_color(code_breaker.turn_number, game_board.feedback_board, @correct_colors, code_breaker.player_choice)
+    p @correct_colors
     code_breaker.turn_number += 1
     display_board
     puts "------------------"
@@ -133,7 +157,7 @@ class CodeSetter
       puts "Input your code:"
       @code = gets.chomp.split(" ")
     else
-      @code = random_code(COLORS)
+      @code = COLORS.sample(4)
       p @code
     end
   end
