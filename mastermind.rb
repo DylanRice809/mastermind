@@ -7,13 +7,9 @@ module Computer
     color_array.sample(4)
   end
 
-  def computer_guess (color_array)
-    color_array.sample(4)
-  end
-
-  def computer_guess (correct_colors_array)
-    if correct_colors_array.length == 4
-      correct_colors_array.sample(4)
+  def computer_guess (correct_colors_array, answer_array)
+    if answer_array.length == 4
+      answer_array.sample(4)
     else
       color_choice = correct_colors_array.sample(1).join
       choice = []
@@ -25,9 +21,12 @@ module Computer
     end
   end
 
-  def check_computer_color (turn, feedback, correct_colors_array, guess)
-    if feedback[turn][:colors_correct] == 0
+  def check_computer_color (turn, feedback, correct_colors_array, guess, answer_array)
+    if feedback[turn][:colors_correct] == 0 && answer_array.include?(guess[0]) == false
       correct_colors_array.delete(guess[0])
+    end
+    if feedback[turn][:colors_correct] == 1 && answer_array.include?(guess[0]) == false
+      answer_array << guess[0]
     end
   end
 end
@@ -50,6 +49,7 @@ class Game
   attr_reader :code_setter
 
   def initialize
+    @final_answer = []
     @correct_colors = []
     @correct_colors = COLORS.each { |color| @correct_colors << color }
     @game_board = GameBoard.new
@@ -95,14 +95,31 @@ class Game
     end
   end
 
+  def new_choice (human)
+    if human
+      code_breaker.player_choice = human_guess
+    else
+      loop do
+        code_breaker.player_choice = computer_guess(@correct_colors, @final_answer)
+        puts "Choice:"
+        p code_breaker.player_choice
+        if @final_answer.length == 4 || @final_answer.length == 0 || @final_answer.include?(code_breaker.player_choice[0]) == false
+          break
+        end
+      end
+    end
+  end
+
   def take_turn
     puts "Guess four colors:"
-    code_breaker.new_choice(code_breaker.human)
+    new_choice(code_breaker.human)
     game_board.decoding_board[code_breaker.turn_number] = code_breaker.player_choice
     game_board.feedback_board[code_breaker.turn_number][:colors_correct] = check_color(code_setter.code, code_breaker.player_choice)
     game_board.feedback_board[code_breaker.turn_number][:color_and_position_correct] = check_color_and_position(code_setter.code, code_breaker.player_choice)
-    check_computer_color(code_breaker.turn_number, game_board.feedback_board, @correct_colors, code_breaker.player_choice)
+    check_computer_color(code_breaker.turn_number, game_board.feedback_board, @correct_colors, code_breaker.player_choice, @final_answer)
+    p COLORS
     p @correct_colors
+    p @final_answer
     code_breaker.turn_number += 1
     display_board
     puts "------------------"
@@ -133,14 +150,6 @@ class CodeBreaker
     @human = human
     @turn_number = 0
     @player_choice = []
-  end
-
-  def new_choice (human)
-    if human
-      @player_choice = human_guess
-    else
-      @player_choice = computer_guess(COLORS)
-    end
   end
 end
 
