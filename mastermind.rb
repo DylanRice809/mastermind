@@ -58,7 +58,7 @@ class Game
       @code_setter = CodeSetter.new(true)
       @code_breaker = CodeBreaker.new(false)
     else
-      @code_setter = CodeSetter.new(false)
+      @code_setter = CodeSetter.new(true)
       @code_breaker = CodeBreaker.new(true)
     end
   end
@@ -101,8 +101,6 @@ class Game
     else
       loop do
         code_breaker.player_choice = computer_guess(@correct_colors, @final_answer)
-        puts "Choice:"
-        p code_breaker.player_choice
         if @final_answer.length == 4 || @final_answer.length == 0 || @final_answer.include?(code_breaker.player_choice[0]) == false
           break
         end
@@ -117,9 +115,6 @@ class Game
     game_board.feedback_board[code_breaker.turn_number][:colors_correct] = check_color(code_setter.code, code_breaker.player_choice)
     game_board.feedback_board[code_breaker.turn_number][:color_and_position_correct] = check_color_and_position(code_setter.code, code_breaker.player_choice)
     check_computer_color(code_breaker.turn_number, game_board.feedback_board, @correct_colors, code_breaker.player_choice, @final_answer)
-    p COLORS
-    p @correct_colors
-    p @final_answer
     code_breaker.turn_number += 1
     display_board
     puts "------------------"
